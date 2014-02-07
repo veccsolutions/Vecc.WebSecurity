@@ -47,13 +47,13 @@ Implementation
 * Add a reference to built library (Vecc.WebSecurity.dll)
 * In your web site, open up global.asax
 * Add a new member, I made mine public static so the rest of the app could use it easily.
-
-    public static readonly Security SecurityManager = new Security();
-    
+````C#
+public static readonly Security SecurityManager = new Security();
+````
 * If you don't already have it, add the Application_BeginRequest method and add call SecurityManager.Apply(Context). Mine looks like this:
-
-    protected void Application_BeginRequest(object sender, EventArgs e)
-    {
-        SecurityManager.Apply(this.Context);
-    }
-    
+````C#
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    SecurityManager.Apply(this.Context);
+}
+````
