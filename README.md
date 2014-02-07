@@ -42,3 +42,18 @@ Current browser support: <http://caniuse.com/#feat=contentsecuritypolicy>
 Current browser support: <x-xss-protection browser support> (As of the time of this writing, IE, Chrome and Safari supported it, Firefox was not.)
 * Allows predefined and valid values, Disabled, Enabled, Enabled and block
 
+Implementation
+----
+* Add a reference to built library (Vecc.WebSecurity.dll)
+* In your web site, open up global.asax
+* Add a new member, I made mine public static so the rest of the app could use it easily.
+
+    public static readonly Security SecurityManager = new Security();
+    
+* If you don't already have it, add the Application_BeginRequest method and add call SecurityManager.Apply(Context). Mine looks like this:
+
+    protected void Application_BeginRequest(object sender, EventArgs e)
+    {
+        SecurityManager.Apply(this.Context);
+    }
+    
