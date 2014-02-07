@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+@using Vecc.WebSecurity.XssProtection
+@model Vecc.WebSecurity.ExampleSite.Models.IndexModel
+@using (Html.BeginForm("Index", "Home"))
+{
+    var xssUrl = "http://localhost/" +
+                 Url.Action("Xss") + "?xss=" +
+                 HttpUtility.UrlEncode(@"
+<script type='text/javascript'>
+    document.getElementById('xssExample').innerHTML = 'xss script ran';
+</script>");
+    <script type="text/javascript">
+        var windowUrl = '@(Html.Raw(xssUrl))';
+    </script>
+    <div>
+        @(Html.LabelFor(model => model.ContentSecurityPolicyEnabled))
+        @(Html.CheckBoxFor(model => model.ContentSecurityPolicyEnabled))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.ContentSecurityPolicyReportOnly))
+        @(Html.CheckBoxFor(model => model.ContentSecurityPolicyReportOnly))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.ContentSecurityPolicyAllowSelf))
+        @(Html.CheckBoxFor(model => model.ContentSecurityPolicyAllowSelf))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.ContentSecurityPolicyReportUri))
+        @(Html.TextBoxFor(model => model.ContentSecurityPolicyReportUri))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.StrictTransportSecurityEnabled))
+        @(Html.CheckBoxFor(model => model.StrictTransportSecurityEnabled))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.StrictTransportSecurityRedirectEnabled))
+        @(Html.CheckBoxFor(model => model.StrictTransportSecurityRedirectEnabled))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.XssProtectionEnabled))
+        @(Html.CheckBoxFor(model => model.XssProtectionEnabled))
+    </div>
+    <div>
+        @(Html.LabelFor(model => model.XssProtectionOption))
+        @(Html.DropDownListFor(model => model.XssProtectionOption,
+                               Enum.GetNames(typeof (XssProtectionOption))
+                                   .Select(name => new SelectListItem
+                                                   {
+                                                       Selected = name == Model.XssProtectionOption.ToString(),
+                                                       Text = name,
+                                                       Value = name
+                                                   })
+              ))
+    </div>
+    <div>
+        Xss Protection Test URL - copy this and paste in a new browser
+        <pre>
+            @Html.Raw(xssUrl)
+        </pre>
+        Or, try a link (doesn't get blocked in IE)
+        <a href="javascript:window.open(windowUrl);" >XSS Test Link</a>
+        Xss result:
+        <div id="xssExample">Xss not ran</div>
+        @(Html.Raw(Request.QueryString["xss"]))
+    </div>
+    <div>
+        Note: you will need to press update twice, or once then reload the page to see the effect.
+        The reason is because of where in the pipeline the headers and logic is injected.
+    </div>
+    <input type="submit" value="Update" />
+}
+
+<div>
+    Content Security Policy Testing results:
+</div>
+<ul id="ScriptExampleResults">
+    <li style="position: relative; width: 250px; height: 20px;">
+        <div style="position: absolute; width: 250px; height: 20px; top: 0; left: 0; background-color: white;">
+            On-site (self) Style Applied
+        </div>
+        <div id="onsiteCssRan" style="position: absolute; width: 250px; height: 20px; top: 0; left: 0; background-color: white; ">
+            On-site (self) Style Not Applied.
+        </div>
+    </li>
+
+    <li style="display: none;">Inline style not applied.</li>
+    <li style="display: inline;" id="inlineCssRan">Inline style applied.</li>
+    
+    <li style="position: relative; width: 250px; height: 20px;">
+        <div style="position: absolute; width: 450px; height: 20px; top: 0; left: 0; background-color: white;">
+            External-site (not self) Style Applied
+        </div>
+        <div id="offsiteCssRan" style="position: absolute; width: 450px; height: 20px; top: 0; left: 0; background-color: white; ">
+            External-site (not self) Style Not Applied.
+        </div>
+    </li>
+
+    <li id="InlineScriptRan">Inline script not ran.</li>
+    <li id="SelfScriptRan">On-site (self) script not ran.</li>
+    <li id="ExternalScriptRan">External-site (not-self) script not ran.</li>
+</ul>
+
+<script type="text/javascript">
+    document.getElementById("InlineScriptRan").innerHTML = "Inline script ran";
+</script>
+<script type="text/javascript" src="@(Url.Content("~/Scripts/TestOnsite.js"))"></script>
+<script type="text/javascript" src="http://127.0.0.1/Vecc.WebSecurity.ExampleSite/Scripts/TestExternal.js"></script>
+<link type="text/css" rel="stylesheet" href="http://127.0.0.1/Vecc.WebSecurity.ExampleSite/Content/ExternalSite.css" />
